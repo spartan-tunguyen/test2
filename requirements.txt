@@ -1,0 +1,5 @@
+dotenv
+requests
+tqdm
+openai
+qdrant-client

@@ -1,70 +1,167 @@
-# Getting Started with Create React App
+# GitHub Expert Finder
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A sophisticated pipeline for identifying domain experts on GitHub based on their contributions, comments, and code quality.
 
-## Available Scripts
+## Overview
 
-In the project directory, you can run:
+GitHub Expert Finder is an automated system that builds a knowledge base of domain experts on GitHub by analyzing their activity, comments, and contributions. The pipeline collects comments from top GitHub users in specific programming languages, enriches them with AI-powered classifications and tone analysis, and makes them searchable through vector embeddings.
 
-### `npm start`
+## Pipeline Architecture
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+The system follows a comprehensive data processing workflow:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+1. **Expert Identification**: Finds top GitHub users in a specific programming language based on followers, stars, PRs, and other metrics
+2. **Comment Collection**: Gathers issue and PR comments from identified experts
+3. **Comment Enrichment**: Uses OpenAI to classify and analyze comment content
+4. **Tone Analysis**: Evaluates the tone and communication style of expert comments
+5. **Vector Embedding**: Creates searchable embeddings and stores them in Qdrant vector database
+6. **Parallel Processing**: Handles multiple experts concurrently with controlled task management
 
-### `npm test`
+## Key Features
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- **Multi-step Pipeline Architecture**: Complete workflow from expert discovery to searchable embeddings
+- **Parallel Processing**: Efficiently processes multiple experts simultaneously
+- **Configurable Settings**: Customize processing parameters via environment variables
+- **Persistent Storage**: Saves data at each step for resume capability and analysis
+- **Comprehensive Logging**: Detailed progress tracking and error handling
+- **Task Management**: Controls concurrency to avoid API rate limits
+- **Dual API Support**: Uses either GitHub's GraphQL API or REST API for data collection
+- **Tone Analysis**: Evaluates communication patterns and expertise indicators
 
-### `npm run build`
+## Key Advantages
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- **Time-Efficient Expert Discovery**: Automates the process of finding domain experts
+- **Evidence-Based Expertise Ranking**: Uses objective metrics rather than self-reported skills
+- **Scalable Architecture**: Process thousands of potential experts with controlled concurrency
+- **Rich Data Collection**: Gathers valuable knowledge and insights from top GitHub contributors
+- **AI-Enhanced Analysis**: Uses OpenAI to classify and enhance comment data
+- **Vector Search Capabilities**: Makes expert knowledge searchable via semantic embeddings
+- **Tone-Based Expert Profiling**: Identifies communication patterns and expertise indicators
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Installation
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+1. Clone this repository:
+   ```
+   git clone git@github.com:spartan-phunguyen/github-crawler.git
+   cd github-crawler
+   ```
 
-### `npm run eject`
+2. Create and activate a virtual environment:
+   ```
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+3. Install dependencies:
+   ```
+   pip install -r requirements.txt
+   ```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+4. Configure environment variables in a `.env` file:
+   ```
+   GITHUB_TOKEN=your_github_token_here
+   OPENAI_API_KEY=your_openai_api_key_here
+   LANGUAGE=python  # Language to find experts for
+   MAX_EXPERTS=10   # Maximum number of experts to process
+   COMMENT_LIMIT=200  # Maximum comments per expert
+   OUTPUT_DIR=data  # Directory to save results
+   QDRANT_URL=http://localhost:6333  # Qdrant server URL
+   QDRANT_API_KEY=your_qdrant_api_key  # Optional
+   OPENAI_MODEL=gpt-4o-mini  # Model for comment enrichment
+   EMBEDDING_MODEL=text-embedding-3-small  # Model for embeddings
+   MAX_CONCURRENT_TASKS=5  # Maximum parallel tasks
+   CONTINUE_CRAWL=true  # Continue from previous crawl
+   CONTINUE_ENRICHMENT=true  # Continue from previous enrichment
+   ALL_HISTORICAL=false  # Get all historical comments
+   ```
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## Usage
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Running the Pipeline for a Single Language
 
-## Learn More
+Run the complete pipeline with settings from your `.env` file:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```
+python pipeline.py
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Running the Pipeline for Multiple Languages
 
-### Code Splitting
+Use the bash script to run the pipeline for multiple languages in sequence:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+```
+chmod -R +x run_pipeline.sh
+./run_pipeline.sh
+```
 
-### Analyzing the Bundle Size
+Available parameters:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+- `--languages`: Comma-separated list of languages (default: several popular languages)
+- `--max-experts`: Maximum number of experts per language (default: 10)
+- `--comment-limit`: Maximum number of comments per expert (default: 100)
+- `--env-file`: Path to .env file (default: ".env")
 
-### Making a Progressive Web App
+### Running Tone Analysis on Expert Comments
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+After collecting expert comments, you can analyze their tone and communication style:
 
-### Advanced Configuration
+```
+python run_all_experts_tone.py
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+Available parameters:
 
-### Deployment
+- `--data-dir`: Base directory for data (default: 'data')
+- `--force`: Force reanalysis even if already done
+- `--days`: Reanalyze files older than this many days (default: 7)
+- `--model`: OpenAI model to use (default: gpt-4o-mini)
+- `--language`: Process only a specific language (e.g. 'python')
+- `--expert`: Process only a specific expert (must use with --language)
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+### Using Specific Expert Lists
 
-### `npm run build` fails to minify
+You can specify experts to process in two ways:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+1. List usernames in `.env`:
+   ```
+   EXPERT_USERNAMES=torvalds,antirez,gaearon
+   ```
+
+2. Provide a file with usernames (one per line or JSON format):
+   ```
+   EXPERT_LIST_FILE=experts.json
+   ```
+
+## Components
+
+The pipeline uses several specialized components:
+
+1. **GitHubExpertFinder**: Identifies top users in a programming language (supports both REST API and GraphQL)
+2. **GitHubCommentCrawler**: Collects comments from GitHub users (supports both REST API and GraphQL)
+3. **CommentEnricher**: Uses OpenAI to analyze and classify comments
+4. **CommentEmbedder**: Creates vector embeddings and uploads to Qdrant
+5. **ToneAnalysisPipeline**: Analyzes expert communication patterns and expertise indicators
+
+## Output
+
+The pipeline generates several outputs in the data directory:
+
+- `{language}_experts.json`: List of identified experts
+- `{username}_comments.json`: Raw comments for each expert
+- `{username}_comments.enriched.json`: Enriched comments with classifications
+- `{language}_pipeline_results.json`: Pipeline execution summary
+- `tone_analysis/{language}/experts/{username}/*_tone_analysis.json`: Tone analysis results
+
+## Troubleshooting
+
+If you encounter API rate limit errors:
+
+- Reduce `MAX_CONCURRENT_TASKS` in the `.env` file
+- Increase the sleep time between languages in the `run_pipeline.sh` script
+- Make sure you're using a GitHub token with appropriate scopes
+- Try using `USE_REST_API=true` to use GitHub's REST API which may have different rate limits
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
